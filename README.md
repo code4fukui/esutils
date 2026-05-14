@@ -1,182 +1,77 @@
-# esutils [![Build Status](https://secure.travis-ci.org/estools/esutils.svg)](http://travis-ci.org/estools/esutils)
-esutils ([esutils](http://github.com/estools/esutils)) is
-utility box for ECMAScript language tools.
+# esutils
+
+> 日本語のREADMEはこちらです: [README.ja.md](README.ja.md)
+
+[
+![NPM version](https://img.shields.io/npm/v/esutils.svg)
+](https://www.npmjs.com/package/esutils)
+[
+![Build Status](https://travis-ci.org/estools/esutils.svg?branch=master)
+](https://travis-ci.org/estools/esutils)
+[
+![License](https://img.shields.io/npm/l/esutils.svg)
+](LICENSE.BSD)
+
+A utility library for ECMAScript language tools, providing functions for AST node validation, character code checks, and keyword/identifier analysis.
+
+## Installation
+
+```bash
+npm install esutils
+```
+
+## Usage
+
+```javascript
+import { ast, code, keyword } from 'esutils';
+
+// Example: Check if an AST node is an expression
+const node = { type: 'Literal', value: 42 };
+if (ast.isExpression(node)) {
+  console.log('It is an expression!');
+}
+
+// Example: Check if a string is a valid ES6 identifier
+if (keyword.isIdentifierES6('myVar')) {
+  console.log('Valid identifier.');
+}
+```
 
 ## API
 
-## `ast` 
+### `ast`
 
-### `ast.isExpression(node)` 
+Utilities for working with ECMAScript AST nodes.
 
-Returns `true` if `node` is an `Expression` as defined in ECMA262 edition 5.1 section
-[11](https://es5.github.io/#x11).
+*   `ast.isExpression(node)`: Returns `true` if `node` is an `Expression` as defined in ECMA-262, 5.1, Section 11.
+*   `ast.isStatement(node)`: Returns `true` if `node` is a `Statement` as defined in ECMA-262, 5.1, Section 12.
+*   `ast.isIterationStatement(node)`: Returns `true` if `node` is an `IterationStatement` (e.g., `ForStatement`, `WhileStatement`).
+*   `ast.isSourceElement(node)`: Returns `true` if `node` is a `SourceElement` (a `Statement` or `FunctionDeclaration`).
+*   `ast.trailingStatement(node)`: Returns the trailing `Statement` of a given node (e.g., the `body` of a `ForStatement` or the `consequent` of an `IfStatement`).
+*   `ast.isProblematicIfStatement(node)`: Returns `true` if `node` is a problematic `IfStatement` that could cause a "dangling else" ambiguity (a nested `if` without an `else` inside another `if`'s `consequent`).
 
-### `ast.isStatement(node)` 
+### `code`
 
-Returns `true` if `node` is a `Statement` as defined in ECMA262 edition 5.1 section
-[12](https://es5.github.io/#x12).
+Utilities for checking character codes.
 
-### `ast.isIterationStatement(node)` 
+*   `code.isDecimalDigit(code)`: Checks for decimal digits (`0-9`).
+*   `code.isHexDigit(code)`: Checks for hexadecimal digits (`0-9`, `a-f`, `A-F`).
+*   `code.isOctalDigit(code)`: Checks for octal digits (`0-7`).
+*   `code.isWhiteSpace(code)`: Checks for whitespace characters as defined by the ECMAScript standard.
+*   `code.isLineTerminator(code)`: Checks for line terminator characters.
+*   `code.isIdentifierStartES5(code)` / `code.isIdentifierStartES6(code)`: Checks if a character code is a valid start of an identifier for the specified ECMAScript version.
+*   `code.isIdentifierPartES5(code)` / `code.isIdentifierPartES6(code)`: Checks if a character code is a valid part of an identifier for the specified ECMAScript version.
 
-Returns `true` if `node` is an `IterationStatement` as defined in ECMA262 edition
-5.1 section [12.6](https://es5.github.io/#x12.6).
+### `keyword`
 
-### `ast.isSourceElement(node)` 
+Utilities for validating identifiers and keywords. Functions that accept a `strict` boolean parameter check against keywords reserved in strict mode.
 
-Returns `true` if `node` is a `SourceElement` as defined in ECMA262 edition 5.1
-section [14](https://es5.github.io/#x14).
-
-### `ast.trailingStatement(node)` 
-
-Returns `Statement?` if `node` has trailing `Statement`.
-```js
-if (cond)
-    consequent;
-```
-When taking this `IfStatement`, returns `consequent;` statement.
-
-### `ast.isProblematicIfStatement(node)` 
-
-Returns `true` if `node` is a problematic `IfStatement`. If `node` is a problematic `IfStatement`, `node` cannot be represented as an one-to-one JavaScript code.
-```js
-{
-    type: 'IfStatement',
-    consequent: {
-        type: 'WithStatement',
-        body: {
-            type: 'IfStatement',
-            consequent: {type: 'EmptyStatement'}
-        }
-    },
-    alternate: {type: 'EmptyStatement'}
-}
-```
-The above node cannot be represented as a JavaScript code, since the top level `else` alternate belongs to an inner `IfStatement`.
-
-
-## `code` 
-
-### `code.isDecimalDigit(code)` 
-
-Return `true` if provided code is decimal digit.
-
-### `code.isHexDigit(code)` 
-
-Return `true` if provided code is hexadecimal digit.
-
-### `code.isOctalDigit(code)` 
-
-Return `true` if provided code is octal digit.
-
-### `code.isWhiteSpace(code)` 
-
-Return `true` if provided code is white space. 
-White space characters are formally defined in ECMA262.
-
-### `code.isLineTerminator(code)` 
-
-Return `true` if provided code is line terminator. 
-Line terminator characters are formally defined in ECMA262.
-
-### `code.isIdentifierStart(code)` 
-
-Return `true` if provided code can be the first character of ECMA262 `Identifier`. 
-They are formally defined in ECMA262.
-
-### `code.isIdentifierPart(code)` 
-
-Return `true` if provided code can be the trailing character of ECMA262 `Identifier`. 
-They are formally defined in ECMA262.
-
-## `keyword` 
-
-### `keyword.isKeywordES5(id, strict)` 
-
-Returns `true` if provided identifier string is a Keyword or Future Reserved Word
-in ECMA262 edition 5.1. 
-They are formally defined in ECMA262 sections
-[7.6.1.1](http://es5.github.io/#x7.6.1.1) and [7.6.1.2](http://es5.github.io/#x7.6.1.2),
-respectively. 
-If the `strict` flag is truthy, this function additionally checks whether
-`id` is a `Keyword` or `FutureReservedWord` under strict mode.
-
-### `keyword.isKeywordES6(id, strict)` 
-
-Returns `true` if provided identifier string is a `Keyword` or `FutureReservedWord`
-in ECMA262 edition 6. 
-They are formally defined in ECMA262 sections
-[11.6.2.1](http://ecma-international.org/ecma-262/6.0/#sec-keywords) and
-[11.6.2.2](http://ecma-international.org/ecma-262/6.0/#sec-future-reserved-words),
-respectively. 
-If the `strict` flag is truthy, this function additionally checks whether
-`id` is a `Keyword` or `FutureReservedWord` under strict mode.
-
-### `keyword.isReservedWordES5(id, strict)` 
-
-Returns `true` if provided identifier string is a `ReservedWord` in ECMA262 edition 5.1.
-They are formally defined in ECMA262 section [7.6.1](http://es5.github.io/#x7.6.1).
-If the `strict` flag is truthy, this function additionally checks whether `id`
-is a `ReservedWord` under strict mode.
-
-### `keyword.isReservedWordES6(id, strict)` 
-
-Returns `true` if provided identifier string is a `ReservedWord` in ECMA262 edition 6.
-They are formally defined in ECMA262 section [11.6.2](http://ecma-international.org/ecma-262/6.0/#sec-reserved-words).
-If the `strict` flag is truthy, this function additionally checks whether `id`
-is a `ReservedWord` under strict mode.
-
-### `keyword.isRestrictedWord(id)` 
-
-Returns `true` if provided identifier string is one of `eval` or `arguments`.
-They are restricted in strict mode code throughout ECMA262 edition 5.1 and
-in ECMA262 edition 6 section [12.1.1](http://ecma-international.org/ecma-262/6.0/#sec-identifiers-static-semantics-early-errors).
-
-### `keyword.isIdentifierNameES5(id)` 
-
-Return `true` if provided identifier string is an `IdentifierName` as specified in
-ECMA262 edition 5.1 section [7.6](https://es5.github.io/#x7.6).
-
-### `keyword.isIdentifierNameES6(id)` 
-
-Return `true` if provided identifier string is an `IdentifierName` as specified in
-ECMA262 edition 6 section [11.6](http://ecma-international.org/ecma-262/6.0/#sec-names-and-keywords).
-
-### `keyword.isIdentifierES5(id, strict)` 
-
-Return `true` if provided identifier string is an `Identifier` as specified in
-ECMA262 edition 5.1 section [7.6](https://es5.github.io/#x7.6). 
-If the `strict` flag is truthy, this function additionally checks whether `id` 
-is an `Identifier` under strict mode.
-
-### `keyword.isIdentifierES6(id, strict)` 
-
-Return `true` if provided identifier string is an `Identifier` as specified in
-ECMA262 edition 6 section [12.1](http://ecma-international.org/ecma-262/6.0/#sec-identifiers).
-If the `strict` flag is truthy, this function additionally checks whether `id`
-is an `Identifier` under strict mode.
+*   `keyword.isKeywordES5(id, strict)` / `keyword.isKeywordES6(id, strict)`
+*   `keyword.isReservedWordES5(id, strict)` / `keyword.isReservedWordES6(id, strict)`
+*   `keyword.isRestrictedWord(id)`: Checks for `eval` and `arguments`.
+*   `keyword.isIdentifierNameES5(id)` / `keyword.isIdentifierNameES6(id)`: Checks if a string is a valid identifier name (before checking for reserved words).
+*   `keyword.isIdentifierES5(id, strict)` / `keyword.isIdentifierES6(id, strict)`: Checks if a string is a valid identifier (and not a reserved word).
 
 ## License
 
-Copyright (C) 2013 [Yusuke Suzuki](http://github.com/Constellation)
- (twitter: [@Constellation](http://twitter.com/Constellation)) and other contributors.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+[BSD-2-Clause](LICENSE.BSD)
